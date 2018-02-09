@@ -33,13 +33,18 @@ test("2-on-data", () => {
 test("3-idea", () => {
     var ee: Eemitter<IEemitterMessageMapData<number>> = new eemitter.Eemitter();
     var state = { sideEffect: 0 };
-    var dispose = (ee as any).chain("data", 
-        function (
-        this: SideEffect, 
-        x: number, 
-        next:Eemitter<IEemitterMessageMapData<number>>) {
-        next.emit("data", x+1);
-    }, state);
+    (ee as any).chain("data",
+        function (a: number, next: Eemitter<IEemitterMessageMapData<number>>) {
+            next.emit("data", a + 1);
+        }).chain("data",
+        function (b: number, next: Eemitter<IEemitterMessageMapData<number>>) {
+            if (b < 10) {
+                next.emit("data", b + 40);
+            }
+        }).on("data",
+        function (this: SideEffect, v: number) {
+            this.sideEffect = v;
+        }, state);
     // ee.emit("data", 1);
     // ee.emit("data", 41);
     // dispose();
